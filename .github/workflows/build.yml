@@ -43,6 +43,6 @@ jobs:
         with:
           name: esp32-firmware
           path: |
-            .pio/build/esp32dev/firmware.bin
-            .pio/build/esp32dev/partitions.bin
-          retention-days: 30
+            **/.pioenvs/**/firmware.bin
+            **/.pio/build/**/firmware.bin
+          if-no-files-found: error
