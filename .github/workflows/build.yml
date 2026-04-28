@@ -45,7 +45,7 @@ jobs:
           path: firmware_output/
           retention-days: 30
 
-       name: Collect and Upload all .bin files
+      - name: Collect and Upload all .bin files
         run: |
           mkdir -p firmware_output
           find $GITHUB_WORKSPACE -name "*.bin" 2>/dev/null -exec cp {} firmware_output/ \;
