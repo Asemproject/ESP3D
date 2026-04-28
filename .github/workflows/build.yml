@@ -42,7 +42,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware
-          path: |
-            **/.pioenvs/**/firmware.bin
-            **/.pio/build/**/firmware.bin
+          path: firmware_output/
+          retention-days: 30
+
+      - name: Collect and Upload all .bin files
+        run: |
+          mkdir -p firmware_output
+          find / -name "*.bin" 2>/dev/null -exec cp {} firmware_output/ \;
+
+      - name: Upload all bin files
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-firmware
+          path: firmware_output/
           if-no-files-found: error
+          retention-days: 30
