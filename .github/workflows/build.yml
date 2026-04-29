@@ -1,4 +1,21 @@
-- name: Free disk space
+name: Build ESP3D Firmware
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
@@ -12,10 +29,6 @@
         with:
           python-version: '3.11'
 
-      - name: Install PlatformIO
-        run: |
-          pip install platformio
-
       - name: Cache PlatformIO
         uses: actions/cache@v4
         with:
@@ -24,25 +37,24 @@
           restore-keys: |
             ${{ runner.os }}-pio-
 
-      - name: Build Firmware ESP32
+      - name: Install PlatformIO
+        run: pip install -U platformio
+
+      - name: Patch SDIO_BIT_MODE
         run: |
-          pio run -e esp32dev
+          sed -i 's/SDIO_BIT_MODE/SD_ONE_BIT_MODE/g' \
+            esp3d/src/core/commands/ESP420.cpp
 
-      - name: Upload Firmware Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: esp32-firmware
-          path: firmware_output/
-          retention-days: 30
+      - name: Build Firmware ESP32
+        run: pio run -e esp32dev
 
-      - name: Collect and Upload all .bin files
+      - name: Collect bin files
         run: |
           mkdir -p firmware_output
-          find $GITHUB_WORKSPACE -name "*.bin" 2>/dev/null -exec cp {} firmware_output/ \;
-          echo "=== Files collected ==="
+          find $GITHUB_WORKSPACE -name "*.bin" -exec cp {} firmware_output/ \;
           ls -la firmware_output/
 
-      - name: Upload all bin files
+      - name: Upload Firmware Artifact
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware
